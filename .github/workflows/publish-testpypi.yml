@@ -1,0 +1,132 @@
+name: Publish TestPyPI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "pyproject.toml"
+      - "MANIFEST.in"
+      - "README.md"
+      - "LICENSE"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-testpypi-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_and_publish:
+    name: Build and publish to TestPyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/pandapower-agent/
+    outputs:
+      published_version: ${{ steps.version.outputs.published_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Calculate and apply CI dev version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_VERSION="$(python - <<'PY'
+          import tomllib
+          from pathlib import Path
+
+          data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+          print(data["project"]["version"])
+          PY
+          )"
+          export PUBLISHED_VERSION="${BASE_VERSION}.dev${GITHUB_RUN_NUMBER}"
+          python - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          version = os.environ["PUBLISHED_VERSION"]
+          pyproject = Path("pyproject.toml")
+          text = pyproject.read_text(encoding="utf-8")
+          updated, count = re.subn(
+              r'(?m)^version\s*=\s*"[^"]+"\s*$',
+              f'version = "{version}"',
+              text,
+              count=1,
+          )
+          if count != 1:
+              raise SystemExit("Failed to update version in pyproject.toml")
+          pyproject.write_text(updated, encoding="utf-8")
+          PY
+          echo "published_version=${PUBLISHED_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Build distributions
+        run: python -m build
+
+      - name: Check distributions
+        run: twine check dist/*
+
+      - name: Publish package to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist/
+
+  post_publish_smoke:
+    name: Post-publish smoke test
+    runs-on: ubuntu-latest
+    needs: build_and_publish
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Wait and install from TestPyPI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          VERSION="${{ needs.build_and_publish.outputs.published_version }}"
+          PACKAGE="pandapower-agent==${VERSION}"
+
+          for attempt in {1..12}; do
+            echo "Attempt ${attempt}/12: installing ${PACKAGE}"
+            if python -m pip install \
+              --index-url https://test.pypi.org/simple \
+              --extra-index-url https://pypi.org/simple \
+              "${PACKAGE}"; then
+              echo "Install succeeded."
+              break
+            fi
+
+            if [ "${attempt}" -eq 12 ]; then
+              echo "Install failed after retries."
+              exit 1
+            fi
+
+            echo "Package not available yet. Waiting 15s..."
+            sleep 15
+          done
+
+      - name: CLI smoke checks
+        run: |
+          agent --version
+          agent --help
+          agent networks --max 3 --format json

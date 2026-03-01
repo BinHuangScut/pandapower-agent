@@ -6,13 +6,13 @@ from typing import Any
 
 from openai import OpenAI
 
-from app.agent.prompts import build_system_prompt
-from app.config import settings
-from app.power.tools import ToolExecutor, default_bootstrap_if_needed
-from app.schema.types import ToolResult
+from pandapower_agent.agent.prompts import build_system_prompt
+from pandapower_agent.config import settings
+from pandapower_agent.power.executor import ToolExecutor, default_bootstrap_if_needed
+from pandapower_agent.schema.types import ToolResult
 
 if TYPE_CHECKING:
-    from app.power.state import SessionState
+    from pandapower_agent.power.state import SessionState
 
 
 class AgentRuntime:
@@ -180,7 +180,9 @@ class AgentRuntime:
         identical_failure_streak: int,
     ) -> tuple[ToolResult, bool, str | None, int]:
         signature = self._tool_call_signature(tool_name, arguments)
-        blocked_repeat = signature == last_failed_signature and identical_failure_streak >= self.MAX_IDENTICAL_TOOL_FAILURE_STREAK
+        blocked_repeat = (
+            signature == last_failed_signature and identical_failure_streak >= self.MAX_IDENTICAL_TOOL_FAILURE_STREAK
+        )
         if blocked_repeat:
             result = self._blocked_repeated_failure(tool_name, identical_failure_streak + 1)
         else:
@@ -227,20 +229,24 @@ class AgentRuntime:
                     arguments = "{}"
                 call_id = getattr(call, "call_id", None) or getattr(call, "id", None)
 
-                result, blocked_repeat, last_failed_signature, identical_failure_streak = self._execute_guarded_tool_call(
-                    name,
-                    arguments,
-                    last_failed_signature,
-                    identical_failure_streak,
+                result, blocked_repeat, last_failed_signature, identical_failure_streak = (
+                    self._execute_guarded_tool_call(
+                        name,
+                        arguments,
+                        last_failed_signature,
+                        identical_failure_streak,
+                    )
                 )
 
-                tool_traces.append({
-                    "tool": name,
-                    "args": self._args_preview(arguments),
-                    "ok": result.ok,
-                    "message": result.message,
-                    "blocked_repeat": blocked_repeat,
-                })
+                tool_traces.append(
+                    {
+                        "tool": name,
+                        "args": self._args_preview(arguments),
+                        "ok": result.ok,
+                        "message": result.message,
+                        "blocked_repeat": blocked_repeat,
+                    }
+                )
 
                 tool_outputs.append(
                     {
@@ -313,19 +319,23 @@ class AgentRuntime:
             messages.append(self._assistant_message_payload_for_chat(message, normalized_calls))
 
             for call in normalized_calls:
-                result, blocked_repeat, last_failed_signature, identical_failure_streak = self._execute_guarded_tool_call(
-                    call["name"],
-                    call["arguments"],
-                    last_failed_signature,
-                    identical_failure_streak,
+                result, blocked_repeat, last_failed_signature, identical_failure_streak = (
+                    self._execute_guarded_tool_call(
+                        call["name"],
+                        call["arguments"],
+                        last_failed_signature,
+                        identical_failure_streak,
+                    )
                 )
-                tool_traces.append({
-                    "tool": call["name"],
-                    "args": self._args_preview(call["arguments"]),
-                    "ok": result.ok,
-                    "message": result.message,
-                    "blocked_repeat": blocked_repeat,
-                })
+                tool_traces.append(
+                    {
+                        "tool": call["name"],
+                        "args": self._args_preview(call["arguments"]),
+                        "ok": result.ok,
+                        "message": result.message,
+                        "blocked_repeat": blocked_repeat,
+                    }
+                )
                 messages.append(
                     {
                         "role": "tool",
@@ -349,11 +359,13 @@ class AgentRuntime:
         bootstrap_result = default_bootstrap_if_needed(self.executor)
         tool_traces: list[dict[str, Any]] = []
         if bootstrap_result is not None:
-            tool_traces.append({
-                "tool": "load_builtin_network",
-                "ok": bootstrap_result.ok,
-                "message": bootstrap_result.message,
-            })
+            tool_traces.append(
+                {
+                    "tool": "load_builtin_network",
+                    "ok": bootstrap_result.ok,
+                    "message": bootstrap_result.message,
+                }
+            )
 
         if settings.use_chat_completions:
             final_text, reached_limit = self._run_turn_with_chat_completions(user_message, tool_traces)
@@ -363,7 +375,9 @@ class AgentRuntime:
         if not final_text:
             final_text = "No final text response generated."
         if reached_limit:
-            final_text = f"{final_text}\n\n[Notice] Reached max tool calls in this turn ({settings.max_tool_calls_per_turn})."
+            final_text = (
+                f"{final_text}\n\n[Notice] Reached max tool calls in this turn ({settings.max_tool_calls_per_turn})."
+            )
         self._append_turn_history(user_message, final_text)
 
         return {

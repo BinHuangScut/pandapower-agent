@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from app.main import _apply_admin_key, chat_loop, run_single
+from pandapower_agent.cli.chat import apply_admin_key, chat_loop, run_single
 
 
 class _DummyState:
@@ -39,9 +39,9 @@ def test_apply_admin_key_requires_correct_password(monkeypatch) -> None:
     runtime = _DummyRuntime()
     outputs: list[str] = []
     monkeypatch.setenv("ADMIN_DEBUG_KEY", "525400")
-    monkeypatch.setattr("app.main.console.print", lambda msg: outputs.append(str(msg)))
+    monkeypatch.setattr("pandapower_agent.cli.chat.console.print", lambda msg: outputs.append(str(msg)))
 
-    ok = _apply_admin_key(runtime, "bad-key")
+    ok = apply_admin_key(runtime, "bad-key")
 
     assert not ok
     assert runtime.admin_mode is False
@@ -51,9 +51,9 @@ def test_apply_admin_key_requires_correct_password(monkeypatch) -> None:
 def test_apply_admin_key_enables_admin_mode(monkeypatch) -> None:
     runtime = _DummyRuntime()
     monkeypatch.setenv("ADMIN_DEBUG_KEY", "525400")
-    monkeypatch.setattr("app.main.console.print", lambda msg: None)
+    monkeypatch.setattr("pandapower_agent.cli.chat.console.print", lambda msg: None)
 
-    ok = _apply_admin_key(runtime, "525400")
+    ok = apply_admin_key(runtime, "525400")
 
     assert ok
     assert runtime.admin_mode is True
@@ -63,8 +63,8 @@ def test_run_single_hides_traces_when_not_admin(monkeypatch) -> None:
     runtime = _DummyRuntime()
     traces: list[list[dict[str, object]]] = []
     replies: list[str] = []
-    monkeypatch.setattr("app.main.render_agent_reply", lambda text: replies.append(text))
-    monkeypatch.setattr("app.main.render_tool_traces", lambda rows: traces.append(rows))
+    monkeypatch.setattr("pandapower_agent.cli.chat.render_agent_reply", lambda text: replies.append(text))
+    monkeypatch.setattr("pandapower_agent.cli.chat.render_tool_traces", lambda rows: traces.append(rows))
 
     rc = run_single(runtime, "run flow")
 
@@ -81,10 +81,10 @@ def test_chat_loop_unlock_admin_mode_with_hidden_command(monkeypatch) -> None:
 
     inputs = iter(["/admin unlock 525400", "run flow", "exit"])
     monkeypatch.setattr("builtins.input", lambda prompt="": next(inputs))
-    monkeypatch.setattr("app.main._print_startup_network_preview", lambda executor: None)
-    monkeypatch.setattr("app.main.render_agent_reply", lambda text: replies.append(text))
-    monkeypatch.setattr("app.main.render_tool_traces", lambda rows: traces.append(rows))
-    monkeypatch.setattr("app.main.console.print", lambda msg: None)
+    monkeypatch.setattr("pandapower_agent.cli.chat.print_startup_network_preview", lambda executor: None)
+    monkeypatch.setattr("pandapower_agent.cli.chat.render_agent_reply", lambda text: replies.append(text))
+    monkeypatch.setattr("pandapower_agent.cli.chat.render_tool_traces", lambda rows: traces.append(rows))
+    monkeypatch.setattr("pandapower_agent.cli.chat.console.print", lambda msg: None)
 
     rc = chat_loop(runtime)
 
@@ -98,9 +98,9 @@ def test_apply_admin_key_requires_config(monkeypatch) -> None:
     runtime = _DummyRuntime()
     outputs: list[str] = []
     monkeypatch.delenv("ADMIN_DEBUG_KEY", raising=False)
-    monkeypatch.setattr("app.main.console.print", lambda msg: outputs.append(str(msg)))
+    monkeypatch.setattr("pandapower_agent.cli.chat.console.print", lambda msg: outputs.append(str(msg)))
 
-    ok = _apply_admin_key(runtime, "525400")
+    ok = apply_admin_key(runtime, "525400")
 
     assert not ok
     assert runtime.admin_mode is False
@@ -112,8 +112,8 @@ def test_chat_loop_reset_clears_state_and_conversation(monkeypatch) -> None:
 
     inputs = iter(["/reset", "exit"])
     monkeypatch.setattr("builtins.input", lambda prompt="": next(inputs))
-    monkeypatch.setattr("app.main._print_startup_network_preview", lambda executor: None)
-    monkeypatch.setattr("app.main.console.print", lambda msg: None)
+    monkeypatch.setattr("pandapower_agent.cli.chat.print_startup_network_preview", lambda executor: None)
+    monkeypatch.setattr("pandapower_agent.cli.chat.console.print", lambda msg: None)
 
     rc = chat_loop(runtime)
 
@@ -128,10 +128,10 @@ def test_chat_loop_plotnet_command(monkeypatch) -> None:
 
     inputs = iter(["/plotnet ./outputs/net.png", "exit"])
     monkeypatch.setattr("builtins.input", lambda prompt="": next(inputs))
-    monkeypatch.setattr("app.main._print_startup_network_preview", lambda executor: None)
-    monkeypatch.setattr("app.main.console.print", lambda msg: None)
+    monkeypatch.setattr("pandapower_agent.cli.chat.print_startup_network_preview", lambda executor: None)
+    monkeypatch.setattr("pandapower_agent.cli.chat.console.print", lambda msg: None)
     monkeypatch.setattr(
-        "app.main._run_plot_network_command",
+        "pandapower_agent.cli.chat.run_plot_network_command",
         lambda executor, **kwargs: calls.append(kwargs) or 0,
     )
 

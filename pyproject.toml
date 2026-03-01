@@ -47,12 +47,13 @@ dev = [
   "pytest>=8.0.0",
   "pytest-mock>=3.14.0",
   "ruff>=0.6.0",
+  "pre-commit>=3.8.0",
   "build>=1.2.0",
   "twine>=5.1.0"
 ]
 
 [project.scripts]
-agent = "app.main:main"
+agent = "pandapower_agent.cli.main:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

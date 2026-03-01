@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import importlib
 
-import app.config as config_module
+import pandapower_agent.config as config_module
 import pytest
 
 

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from app.main import main
-from app.schema.types import ToolResult
+from pandapower_agent.cli.main import main
+from pandapower_agent.schema.types import ToolResult
 
 
 def test_main_networks_invokes_list_tool(monkeypatch) -> None:
@@ -15,8 +15,8 @@ def test_main_networks_invokes_list_tool(monkeypatch) -> None:
             return ToolResult(ok=True, message="ok", data={"network_catalog": [{"name": "case14"}]})
         return ToolResult(ok=True, message="ok")
 
-    monkeypatch.setattr("app.main.ToolExecutor.execute", fake_execute)
-    monkeypatch.setattr("app.main.render_tool_result", lambda result: None)
+    monkeypatch.setattr("pandapower_agent.power.executor.ToolExecutor.execute", fake_execute)
+    monkeypatch.setattr("pandapower_agent.cli.commands.network.render_tool_result", lambda result: None)
 
     rc = main(["networks", "--query", "118", "--max", "5"])
     assert rc == 0
@@ -36,8 +36,8 @@ def test_main_use_invokes_load_and_info(monkeypatch) -> None:
             return ToolResult(ok=True, message="info", data={"current_network": {"name": "case14"}})
         return ToolResult(ok=True, message="ok")
 
-    monkeypatch.setattr("app.main.ToolExecutor.execute", fake_execute)
-    monkeypatch.setattr("app.main.render_tool_result", lambda result: None)
+    monkeypatch.setattr("pandapower_agent.power.executor.ToolExecutor.execute", fake_execute)
+    monkeypatch.setattr("pandapower_agent.cli.commands.network.render_tool_result", lambda result: None)
 
     rc = main(["use", "case14"])
     assert rc == 0
@@ -51,8 +51,8 @@ def test_main_use_returns_nonzero_on_load_failure(monkeypatch) -> None:
             return ToolResult(ok=False, message="bad network", data={"suggestions": ["case14"]})
         return ToolResult(ok=True, message="ok")
 
-    monkeypatch.setattr("app.main.ToolExecutor.execute", fake_execute)
-    monkeypatch.setattr("app.main.render_tool_result", lambda result: None)
+    monkeypatch.setattr("pandapower_agent.power.executor.ToolExecutor.execute", fake_execute)
+    monkeypatch.setattr("pandapower_agent.cli.commands.network.render_tool_result", lambda result: None)
 
     rc = main(["use", "wrong_name"])
     assert rc == 1
@@ -60,7 +60,7 @@ def test_main_use_returns_nonzero_on_load_failure(monkeypatch) -> None:
 
 def test_main_tools_json(monkeypatch) -> None:
     outputs = []
-    monkeypatch.setattr("app.main.render_json", lambda data: outputs.append(data))
+    monkeypatch.setattr("pandapower_agent.cli.commands.tools.render_json", lambda data: outputs.append(data))
     rc = main(["tools", "--format", "json"])
     assert rc == 0
     assert outputs
@@ -73,9 +73,9 @@ def test_main_doctor_runs_health_checks(monkeypatch) -> None:
         calls.append((tool_name, raw_args))
         return ToolResult(ok=True, message="ok")
 
-    monkeypatch.setattr("app.main.ToolExecutor.execute", fake_execute)
-    monkeypatch.setattr("app.main.render_table", lambda title, columns, rows: None)
-    monkeypatch.setattr("app.main.console.print", lambda msg: None)
+    monkeypatch.setattr("pandapower_agent.power.executor.ToolExecutor.execute", fake_execute)
+    monkeypatch.setattr("pandapower_agent.cli.commands.doctor.render_table", lambda title, columns, rows: None)
+    monkeypatch.setattr("pandapower_agent.cli.commands.doctor.console.print", lambda msg: None)
 
     rc = main(["doctor", "--case-name", "case14"])
     assert rc == 0
@@ -96,8 +96,8 @@ def test_main_doctor_returns_nonzero_when_required_check_fails(monkeypatch) -> N
         return ToolResult(ok=True, message="ok")
 
     payloads = []
-    monkeypatch.setattr("app.main.ToolExecutor.execute", fake_execute)
-    monkeypatch.setattr("app.main.render_json", lambda data: payloads.append(data))
+    monkeypatch.setattr("pandapower_agent.power.executor.ToolExecutor.execute", fake_execute)
+    monkeypatch.setattr("pandapower_agent.cli.commands.doctor.render_json", lambda data: payloads.append(data))
 
     rc = main(["doctor", "--format", "json"])
     assert rc == 1
@@ -111,8 +111,8 @@ def test_main_scenarios_calls_list_scenarios(monkeypatch) -> None:
         calls.append((tool_name, raw_args))
         return ToolResult(ok=True, message="ok", data={"scenario_catalog": ["base", "current"]})
 
-    monkeypatch.setattr("app.main.ToolExecutor.execute", fake_execute)
-    monkeypatch.setattr("app.main.render_tool_result", lambda result: None)
+    monkeypatch.setattr("pandapower_agent.power.executor.ToolExecutor.execute", fake_execute)
+    monkeypatch.setattr("pandapower_agent.cli.commands.scenario.render_tool_result", lambda result: None)
     rc = main(["scenarios"])
     assert rc == 0
     assert calls[0][0] == "list_scenarios"
@@ -125,8 +125,8 @@ def test_main_undo_calls_undo_tool(monkeypatch) -> None:
         calls.append((tool_name, raw_args))
         return ToolResult(ok=True, message="ok", data={"current_network": {"name": "case14"}})
 
-    monkeypatch.setattr("app.main.ToolExecutor.execute", fake_execute)
-    monkeypatch.setattr("app.main.render_tool_result", lambda result: None)
+    monkeypatch.setattr("pandapower_agent.power.executor.ToolExecutor.execute", fake_execute)
+    monkeypatch.setattr("pandapower_agent.cli.commands.scenario.render_tool_result", lambda result: None)
     rc = main(["undo"])
     assert rc == 0
     assert calls[0][0] == "undo_last_mutation"
@@ -145,8 +145,8 @@ def test_main_plot_invokes_plot_tool(monkeypatch) -> None:
         calls.append((tool_name, raw_args))
         return ToolResult(ok=True, message="plot ok", data={"plot_path": raw_args["path"]})
 
-    monkeypatch.setattr("app.main.ToolExecutor.execute", fake_execute)
-    monkeypatch.setattr("app.main.render_tool_result", lambda result: None)
+    monkeypatch.setattr("pandapower_agent.power.executor.ToolExecutor.execute", fake_execute)
+    monkeypatch.setattr("pandapower_agent.cli.commands.plot.render_tool_result", lambda result: None)
 
     rc = main(
         [
@@ -177,8 +177,8 @@ def test_main_plot_network_invokes_network_plot_tool(monkeypatch) -> None:
             return ToolResult(ok=True, message="loaded", data={"case_name": raw_args["case_name"]})
         return ToolResult(ok=True, message="plot ok", data={"plot_path": raw_args["path"]})
 
-    monkeypatch.setattr("app.main.ToolExecutor.execute", fake_execute)
-    monkeypatch.setattr("app.main.render_tool_result", lambda result: None)
+    monkeypatch.setattr("pandapower_agent.power.executor.ToolExecutor.execute", fake_execute)
+    monkeypatch.setattr("pandapower_agent.cli.commands.plot.render_tool_result", lambda result: None)
 
     rc = main(
         [

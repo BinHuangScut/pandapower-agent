@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pandas as pd
 
-from app.power.metrics import diff_metrics, summarize_network_metrics
+from pandapower_agent.power.metrics import diff_metrics, summarize_network_metrics
 
 
 def make_net(line=70.0, vmin=0.98, vmax=1.03, loss=10.0):

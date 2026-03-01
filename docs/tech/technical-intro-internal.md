@@ -11,7 +11,7 @@
 
 ## 1. 目标与设计边界
 
-项目目标不是做一个“会聊天的 bot”，而是做一个“可执行、可追溯、可回滚”的电力分析工作台。  
+项目目标不是做一个“会聊天的 bot”，而是做一个“可执行、可追溯、可回滚”的电力分析工作台。
 所以代码里有几个非常明确的边界：
 
 - 数值结果尽量来自工具，不靠模型“猜”
@@ -38,16 +38,16 @@
 
 项目可以拆成 4 层：
 
-1. **交互层（CLI）**  
+1. **交互层（CLI）**
    `src/app/main.py` 负责命令解析、chat 循环、隐藏管理命令（admin debug）。
 
-2. **智能体调度层（AgentRuntime）**  
+2. **智能体调度层（AgentRuntime）**
    `src/app/agent/loop.py` 按 provider 选择调用路径（OpenAI Responses / Google Chat Completions），循环处理模型返回的 tool call，直到没有工具调用或达到上限。
 
-3. **工具执行层（ToolExecutor）**  
+3. **工具执行层（ToolExecutor）**
    `src/app/power/tools.py` 是关键中枢：白名单分发、参数校验、异常处理、变更回滚、结果落盘。
 
-4. **分析适配层（Analysis Modules）**  
+4. **分析适配层（Analysis Modules）**
    `src/app/power/analysis_*.py` 封装 `pandapower` 的能力，并统一产出 `machine_summary` 等结构化字段。
 
 可以把它理解为：
@@ -170,7 +170,7 @@ User -> CLI(main.py)
 2. 在 `src/app/power/analysis_*.py` 或 `tools.py` 写 handler
 3. 在 `TOOL_SPECS` 注册工具（含中英文示例）
 4. 为新工具补单测（成功路径 + 失败路径）
-5. 在 `tutorial.md` 增加使用示例
+5. 在 `docs/user/tutorial.md` 增加使用示例
 
 这条路径的好处是：新增功能不会破坏现有调度结构。
 

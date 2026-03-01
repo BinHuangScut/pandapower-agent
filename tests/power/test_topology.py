@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from app.power.state import SessionState
-from app.power.tools import ToolExecutor
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.power.executor import ToolExecutor
 
 
 def test_run_topology_analysis(monkeypatch) -> None:
@@ -12,7 +12,7 @@ def test_run_topology_analysis(monkeypatch) -> None:
     executor = ToolExecutor(state)
 
     monkeypatch.setattr(
-        "app.power.tools.topology_analysis",
+        "pandapower_agent.power.handlers.analysis.topology_analysis",
         lambda net, respect_switches: {
             "topology_summary": {"connected_components": 2, "component_sizes": [10, 4], "unsupplied_buses": [12]}
         },

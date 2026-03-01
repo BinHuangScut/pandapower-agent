@@ -145,7 +145,9 @@ def _build_topology_dataset(payload: dict[str, Any], metric: str | None) -> Plot
     )
 
 
-def _build_machine_summary_dataset(source_tool: str, payload: dict[str, Any], metric: str | None, top_n: int) -> PlotDataset:
+def _build_machine_summary_dataset(
+    source_tool: str, payload: dict[str, Any], metric: str | None, top_n: int
+) -> PlotDataset:
     summary = payload.get("machine_summary", {})
     if not isinstance(summary, dict) or not summary:
         raise ValueError(f"{source_tool} has no machine_summary data to plot.")
@@ -181,7 +183,9 @@ def _build_machine_summary_dataset(source_tool: str, payload: dict[str, Any], me
     )
 
 
-def build_plot_dataset(source_tool: str, payload: dict[str, Any], metric: str | None = None, top_n: int = 20) -> PlotDataset:
+def build_plot_dataset(
+    source_tool: str, payload: dict[str, Any], metric: str | None = None, top_n: int = 20
+) -> PlotDataset:
     if source_tool == "run_short_circuit":
         return _build_short_circuit_dataset(payload, metric=metric, top_n=top_n)
     if source_tool == "run_contingency_screening":

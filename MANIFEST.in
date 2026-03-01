@@ -3,5 +3,5 @@ include LICENSE
 include CHANGELOG.md
 recursive-include docs *.md *.png *.gif
 prune outputs
-prune plans
+prune docs/archive/plans
 global-exclude __pycache__ *.py[cod]

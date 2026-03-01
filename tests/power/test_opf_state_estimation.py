@@ -5,8 +5,8 @@ from types import SimpleNamespace
 
 import pandas as pd
 
-from app.power.state import SessionState
-from app.power.tools import ToolExecutor
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.power.executor import ToolExecutor
 
 
 class FakePP:
@@ -35,7 +35,7 @@ def test_run_opf(monkeypatch) -> None:
     state = SessionState()
     state.working_net = _net_for_estimation()
     executor = ToolExecutor(state)
-    monkeypatch.setattr("app.power.tools._import_pp", lambda: FakePP())
+    monkeypatch.setattr("pandapower_agent.power.handlers.analysis.import_pp", lambda: FakePP())
 
     result = executor.execute("run_opf", {"objective": "min_cost"})
     assert result.ok
@@ -46,7 +46,7 @@ def test_run_state_estimation(monkeypatch) -> None:
     state = SessionState()
     state.working_net = _net_for_estimation()
     executor = ToolExecutor(state)
-    monkeypatch.setattr("app.power.tools._import_pp", lambda: FakePP())
+    monkeypatch.setattr("pandapower_agent.power.handlers.analysis.import_pp", lambda: FakePP())
 
     fake_est = SimpleNamespace(estimate=lambda net, init: True)
     monkeypatch.setitem(sys.modules, "pandapower.estimation", fake_est)

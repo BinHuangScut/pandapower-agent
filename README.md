@@ -19,7 +19,7 @@ Natural-language power-system analysis on top of `pandapower`: ask in plain Engl
 5. **Deterministic compute core**: `pandapower` executes AC/DC/3-phase flow, short-circuit, OPF, etc.
 6. **Structured delivery**: results are rendered for terminal reading and exported as JSON/plots.
 
-See also: [Architecture](docs/architecture.md) and [Technical intro (public)](technical-intro-public.md).
+See also: [Architecture](docs/architecture.md) and [Technical intro (public)](docs/tech/technical-intro-public.md).
 
 ## High-value scenarios
 
@@ -109,12 +109,30 @@ GOOGLE_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
 scripts/demo_flow.sh
 ```
 
+## Project layout
+
+- `src/pandapower_agent/cli`: CLI parser, command routing, command handlers.
+- `src/pandapower_agent/agent`: LLM runtime, prompts, terminal rendering.
+- `src/pandapower_agent/power`: tool registry/executor, handlers, pandapower integrations.
+- `src/pandapower_agent/schema`: tool argument schemas and typed payloads.
+- `tests/cli|agent|power|schema`: tests mirror runtime package boundaries.
+- `docs/`: user, technical, launch, archive docs with a single entrypoint.
+
+## Repo rules
+
+- Keep root-level docs minimal; place user and technical docs under `docs/`.
+- Do not commit generated artifacts: `dist/`, `outputs/`, `*.egg-info`, `__pycache__/`.
+- New CLI features go through `cli/parser.py`, `cli/dispatch.py`, and `cli/commands/*`.
+- New tools must be registered in `power/registry.py` and executed via `power/executor.py`.
+- Any behavior change must update tests and user-facing docs in the same PR.
+
 ## Documentation
 
+- Docs index: [docs/README.md](docs/README.md)
 - Architecture: [docs/architecture.md](docs/architecture.md)
 - Chinese docs entry: [docs/zh/README.zh-CN.md](docs/zh/README.zh-CN.md)
-- Tutorial: [tutorial.md](tutorial.md)
-- Technical intro (public): [technical-intro-public.md](technical-intro-public.md)
+- Tutorial: [docs/user/tutorial.md](docs/user/tutorial.md)
+- Technical intro (public): [docs/tech/technical-intro-public.md](docs/tech/technical-intro-public.md)
 
 ## Contributing and community
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from app.power import network_catalog as nc
+from pandapower_agent.power import network_catalog as nc
 
 
 def test_discover_network_entries_filters_required_and_private(monkeypatch) -> None:

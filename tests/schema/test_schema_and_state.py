@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from app.power.state import SessionState
-from app.schema.tool_args import AddDGArgs, SaveScenarioArgs, SetLoadArgs
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.schema.tool_args import AddDGArgs, SaveScenarioArgs, SetLoadArgs
 
 
 def test_set_load_requires_delta() -> None:

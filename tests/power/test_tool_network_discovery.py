@@ -4,8 +4,8 @@ from types import SimpleNamespace
 
 import pandas as pd
 
-from app.power.state import SessionState
-from app.power.tools import ToolExecutor
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.power.executor import ToolExecutor
 
 
 def _fake_catalog(query: str | None = None, max_results: int = 20):
@@ -21,7 +21,7 @@ def _fake_catalog(query: str | None = None, max_results: int = 20):
 def test_list_builtin_networks_tool(monkeypatch) -> None:
     state = SessionState()
     executor = ToolExecutor(state)
-    monkeypatch.setattr("app.power.tools.list_available_networks", _fake_catalog)
+    monkeypatch.setattr("pandapower_agent.power.handlers.network.list_available_networks", _fake_catalog)
 
     result = executor.execute("list_builtin_networks", {"query": "118", "max_results": 10})
     assert result.ok
@@ -31,8 +31,8 @@ def test_list_builtin_networks_tool(monkeypatch) -> None:
 def test_load_builtin_network_returns_suggestions(monkeypatch) -> None:
     state = SessionState()
     executor = ToolExecutor(state)
-    monkeypatch.setattr("app.power.tools.list_available_networks", _fake_catalog)
-    monkeypatch.setattr("app.power.tools.get_network_factory", lambda case_name: None)
+    monkeypatch.setattr("pandapower_agent.power.handlers.network.list_available_networks", _fake_catalog)
+    monkeypatch.setattr("pandapower_agent.power.handlers.network.get_network_factory", lambda case_name: None)
 
     result = executor.execute("load_builtin_network", {"case_name": "case1x"})
     assert not result.ok

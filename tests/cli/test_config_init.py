@@ -4,13 +4,15 @@ from pathlib import Path
 
 import pytest
 
-from app.main import main
+from pandapower_agent.cli.main import main
 
 
 @pytest.fixture(autouse=True)
 def _clear_settings_keys(monkeypatch) -> None:
-    monkeypatch.setattr("app.main.settings.openai_api_key", "")
-    monkeypatch.setattr("app.main.settings.google_api_key", "")
+    monkeypatch.setattr("pandapower_agent.config.settings.openai_api_key", "")
+    monkeypatch.setattr("pandapower_agent.config.settings.google_api_key", "")
+    monkeypatch.setattr("pandapower_agent.cli.commands.config_init.settings.openai_api_key", "")
+    monkeypatch.setattr("pandapower_agent.cli.commands.config_init.settings.google_api_key", "")
 
 
 def test_config_init_openai_non_interactive_writes_env(monkeypatch, tmp_path) -> None:
@@ -21,8 +23,8 @@ def test_config_init_openai_non_interactive_writes_env(monkeypatch, tmp_path) ->
         checks.append({"provider": provider, "api_key": api_key, "model": model, "base_url": base_url})
         return True, "ok"
 
-    monkeypatch.setattr("app.main._verify_llm_config", fake_verify_llm_config)
-    monkeypatch.setattr("app.main.console.print", lambda msg: None)
+    monkeypatch.setattr("pandapower_agent.cli.commands.config_init._verify_llm_config", fake_verify_llm_config)
+    monkeypatch.setattr("pandapower_agent.cli.commands.config_init.console.print", lambda msg: None)
 
     rc = main(
         [
@@ -48,7 +50,7 @@ def test_config_init_openai_non_interactive_writes_env(monkeypatch, tmp_path) ->
 
 def test_config_init_openai_requires_key(monkeypatch, tmp_path) -> None:
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr("app.main.console.print", lambda msg: None)
+    monkeypatch.setattr("pandapower_agent.cli.commands.config_init.console.print", lambda msg: None)
 
     rc = main(["config", "init", "--non-interactive", "--provider", "openai", "--skip-check"])
 
@@ -59,7 +61,7 @@ def test_config_init_openai_requires_key(monkeypatch, tmp_path) -> None:
 def test_config_init_non_interactive_requires_force_when_env_exists(monkeypatch, tmp_path) -> None:
     monkeypatch.chdir(tmp_path)
     (tmp_path / ".env").write_text("LLM_PROVIDER=openai\n", encoding="utf-8")
-    monkeypatch.setattr("app.main.console.print", lambda msg: None)
+    monkeypatch.setattr("pandapower_agent.cli.commands.config_init.console.print", lambda msg: None)
 
     rc = main(
         [
@@ -84,8 +86,8 @@ def test_config_init_skip_check_avoids_live_call(monkeypatch, tmp_path) -> None:
         _ = kwargs
         raise AssertionError("should not be called")
 
-    monkeypatch.setattr("app.main._verify_llm_config", fail_verify)
-    monkeypatch.setattr("app.main.console.print", lambda msg: None)
+    monkeypatch.setattr("pandapower_agent.cli.commands.config_init._verify_llm_config", fail_verify)
+    monkeypatch.setattr("pandapower_agent.cli.commands.config_init.console.print", lambda msg: None)
 
     rc = main(
         [

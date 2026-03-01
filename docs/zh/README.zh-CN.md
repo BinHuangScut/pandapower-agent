@@ -4,9 +4,9 @@
 
 ## 快速链接
 
-- 教程: [`tutorial.md`](../../tutorial.md)
-- 技术介绍（公开版）: [`technical-intro-public.md`](../../technical-intro-public.md)
-- 技术介绍（完整版）: [`technical-intro.md`](../../technical-intro.md)
+- 教程: [`docs/user/tutorial.md`](../user/tutorial.md)
+- 技术介绍（公开版）: [`docs/tech/technical-intro-public.md`](../tech/technical-intro-public.md)
+- 技术介绍（完整版）: [`docs/tech/technical-intro-internal.md`](../tech/technical-intro-internal.md)
 - 架构图: [`docs/architecture.md`](../architecture.md)
 
 ## 最小命令集

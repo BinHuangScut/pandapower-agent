@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from app.power.state import SessionState
-from app.power.tools import ToolExecutor
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.power.executor import ToolExecutor
 
 
 def _fake_net():
@@ -16,15 +16,15 @@ def test_run_ac_dc_3ph_modes(monkeypatch) -> None:
     executor = ToolExecutor(state)
 
     monkeypatch.setattr(
-        "app.power.tools.analysis_run_ac_power_flow",
+        "pandapower_agent.power.handlers.analysis.analysis_run_ac_power_flow",
         lambda net, algorithm, enforce_q_lims: {"mode": "ac", "machine_summary": {"x": 1}},
     )
     monkeypatch.setattr(
-        "app.power.tools.analysis_run_dc_power_flow",
+        "pandapower_agent.power.handlers.analysis.analysis_run_dc_power_flow",
         lambda net, calculate_voltage_angles: {"mode": "dc", "machine_summary": {"x": 2}},
     )
     monkeypatch.setattr(
-        "app.power.tools.analysis_run_three_phase_power_flow",
+        "pandapower_agent.power.handlers.analysis.analysis_run_three_phase_power_flow",
         lambda net, max_iteration: {"mode": "3ph", "machine_summary": {"x": 3}},
     )
 

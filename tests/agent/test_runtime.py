@@ -4,15 +4,15 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.agent.loop import AgentRuntime
-from app.power.state import SessionState
-from app.power.tools import ToolExecutor
-from app.schema.types import ToolResult
+from pandapower_agent.agent.runtime import AgentRuntime
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.power.executor import ToolExecutor
+from pandapower_agent.schema.types import ToolResult
 
 
 @pytest.fixture(autouse=True)
 def _default_openai_provider(monkeypatch):
-    monkeypatch.setattr("app.agent.loop.settings.llm_provider", "openai")
+    monkeypatch.setattr("pandapower_agent.agent.runtime.settings.llm_provider", "openai")
 
 
 class FakeCall:
@@ -123,7 +123,9 @@ class FakeChatCompletionsAPI:
         self.kwargs_history.append(kwargs)
         self.calls += 1
         if self.calls == 1:
-            message = FakeChatMessage(content=None, tool_calls=[FakeChatToolCall(self.tool_name, self.arguments, "call_1")])
+            message = FakeChatMessage(
+                content=None, tool_calls=[FakeChatToolCall(self.tool_name, self.arguments, "call_1")]
+            )
             return FakeChatResponse(message)
         return FakeChatResponse(FakeChatMessage(content="done"))
 
@@ -147,8 +149,10 @@ def test_agent_runtime_tool_loop_with_load_builtin_network(monkeypatch) -> None:
     state = SessionState()
     executor = ToolExecutor(state)
 
-    monkeypatch.setattr("app.power.tools.list_available_networks", _fake_network_catalog)
-    monkeypatch.setattr("app.power.tools.get_network_factory", lambda case_name: (lambda: {"name": case_name}))
+    monkeypatch.setattr("pandapower_agent.power.handlers.network.list_available_networks", _fake_network_catalog)
+    monkeypatch.setattr(
+        "pandapower_agent.power.handlers.network.get_network_factory", lambda case_name: (lambda: {"name": case_name})
+    )
 
     runtime = AgentRuntime(
         executor=executor,
@@ -164,8 +168,10 @@ def test_agent_runtime_tool_loop_with_list_builtin_networks(monkeypatch) -> None
     state = SessionState()
     executor = ToolExecutor(state)
 
-    monkeypatch.setattr("app.power.tools.list_available_networks", _fake_network_catalog)
-    monkeypatch.setattr("app.power.tools.get_network_factory", lambda case_name: (lambda: {"name": case_name}))
+    monkeypatch.setattr("pandapower_agent.power.handlers.network.list_available_networks", _fake_network_catalog)
+    monkeypatch.setattr(
+        "pandapower_agent.power.handlers.network.get_network_factory", lambda case_name: (lambda: {"name": case_name})
+    )
 
     runtime = AgentRuntime(
         executor=executor,
@@ -181,8 +187,10 @@ def test_agent_runtime_keeps_turn_memory(monkeypatch) -> None:
     state = SessionState()
     executor = ToolExecutor(state)
 
-    monkeypatch.setattr("app.power.tools.list_available_networks", _fake_network_catalog)
-    monkeypatch.setattr("app.power.tools.get_network_factory", lambda case_name: (lambda: {"name": case_name}))
+    monkeypatch.setattr("pandapower_agent.power.handlers.network.list_available_networks", _fake_network_catalog)
+    monkeypatch.setattr(
+        "pandapower_agent.power.handlers.network.get_network_factory", lambda case_name: (lambda: {"name": case_name})
+    )
 
     client = FakeClient(tool_name="list_builtin_networks", arguments='{"query":"case","max_results":3}')
     runtime = AgentRuntime(executor=executor, client=client)
@@ -201,8 +209,10 @@ def test_agent_runtime_includes_session_context_with_loaded_network(monkeypatch)
     state.working_net = SimpleNamespace(bus=[0, 1], line=[0], load=[0], sgen=[], gen=[0])
     executor = ToolExecutor(state)
 
-    monkeypatch.setattr("app.power.tools.list_available_networks", _fake_network_catalog)
-    monkeypatch.setattr("app.power.tools.get_network_factory", lambda case_name: (lambda: {"name": case_name}))
+    monkeypatch.setattr("pandapower_agent.power.handlers.network.list_available_networks", _fake_network_catalog)
+    monkeypatch.setattr(
+        "pandapower_agent.power.handlers.network.get_network_factory", lambda case_name: (lambda: {"name": case_name})
+    )
 
     client = FakeClient(tool_name="list_builtin_networks", arguments='{"query":"case","max_results":3}')
     runtime = AgentRuntime(executor=executor, client=client)
@@ -232,7 +242,9 @@ def test_agent_runtime_blocks_identical_repeated_failing_tool_calls(monkeypatch)
 
     runtime = AgentRuntime(
         executor=executor,
-        client=RepeatingFailureClient(tool_name="run_power_flow", arguments='{"algorithm":"nr","enforce_q_lims":false}'),
+        client=RepeatingFailureClient(
+            tool_name="run_power_flow", arguments='{"algorithm":"nr","enforce_q_lims":false}'
+        ),
     )
     out = runtime.run_turn("run power flow")
 
@@ -245,9 +257,11 @@ def test_agent_runtime_google_provider_uses_chat_completions(monkeypatch) -> Non
     state = SessionState()
     executor = ToolExecutor(state)
 
-    monkeypatch.setattr("app.agent.loop.settings.llm_provider", "google")
-    monkeypatch.setattr("app.power.tools.list_available_networks", _fake_network_catalog)
-    monkeypatch.setattr("app.power.tools.get_network_factory", lambda case_name: (lambda: {"name": case_name}))
+    monkeypatch.setattr("pandapower_agent.agent.runtime.settings.llm_provider", "google")
+    monkeypatch.setattr("pandapower_agent.power.handlers.network.list_available_networks", _fake_network_catalog)
+    monkeypatch.setattr(
+        "pandapower_agent.power.handlers.network.get_network_factory", lambda case_name: (lambda: {"name": case_name})
+    )
 
     client = FakeChatClient(tool_name="load_builtin_network", arguments='{"case_name":"case14"}')
     runtime = AgentRuntime(executor=executor, client=client)

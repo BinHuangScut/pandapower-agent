@@ -4,8 +4,8 @@ from types import SimpleNamespace
 
 import pandas as pd
 
-from app.power.state import SessionState
-from app.power.tools import ToolExecutor
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.power.executor import ToolExecutor
 
 
 def _net_with_load() -> SimpleNamespace:

@@ -6,7 +6,7 @@ from typing import Any
 from rich.console import Console
 from rich.table import Table
 
-from app.schema.types import ToolResult
+from pandapower_agent.schema.types import ToolResult
 
 console = Console()
 

@@ -26,16 +26,12 @@ def _normalize_base_url(value: str, *, env_name: str) -> str:
     candidate = cleaned
     if "://" not in candidate:
         if candidate.startswith("/"):
-            raise RuntimeError(
-                f"{env_name} must be a full URL (include http:// or https://). Got: {cleaned!r}"
-            )
+            raise RuntimeError(f"{env_name} must be a full URL (include http:// or https://). Got: {cleaned!r}")
         candidate = f"https://{candidate}"
 
     parsed = urlparse(candidate)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-        raise RuntimeError(
-            f"{env_name} must be a full URL (include http:// or https://). Got: {cleaned!r}"
-        )
+        raise RuntimeError(f"{env_name} must be a full URL (include http:// or https://). Got: {cleaned!r}")
     return candidate
 
 
@@ -141,7 +137,9 @@ class Settings:
     @property
     def active_base_url(self) -> str:
         if self.provider == "google":
-            raw_google_base_url = self.google_base_url.strip() or "https://generativelanguage.googleapis.com/v1beta/openai/"
+            raw_google_base_url = (
+                self.google_base_url.strip() or "https://generativelanguage.googleapis.com/v1beta/openai/"
+            )
             return _normalize_base_url(raw_google_base_url, env_name="GOOGLE_BASE_URL")
         raw_openai_base_url = self.openai_base_url.strip() or "https://api.openai.com/v1"
         return _normalize_base_url(raw_openai_base_url, env_name="OPENAI_BASE_URL")

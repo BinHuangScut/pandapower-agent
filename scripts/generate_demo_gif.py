@@ -270,7 +270,9 @@ def main() -> int:
     parser.add_argument("--hold-frames", type=int, default=8)
     parser.add_argument("--reveal-chunk-lines", type=int, default=2, help="How many output lines to reveal per frame.")
     parser.add_argument("--max-output-lines", type=int, default=36, help="Limit output lines shown for each command.")
-    parser.add_argument("--font-path", type=Path, default=None, help="Optional custom font path (use a CJK font for Chinese).")
+    parser.add_argument(
+        "--font-path", type=Path, default=None, help="Optional custom font path (use a CJK font for Chinese)."
+    )
     parser.add_argument(
         "--force-english",
         action="store_true",

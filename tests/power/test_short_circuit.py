@@ -4,8 +4,8 @@ from types import SimpleNamespace
 
 import pandas as pd
 
-from app.power.state import SessionState
-from app.power.tools import ToolExecutor
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.power.executor import ToolExecutor
 
 
 def test_run_short_circuit(monkeypatch) -> None:
@@ -14,7 +14,7 @@ def test_run_short_circuit(monkeypatch) -> None:
     executor = ToolExecutor(state)
 
     monkeypatch.setattr(
-        "app.power.tools.short_circuit_analysis",
+        "pandapower_agent.power.handlers.analysis.short_circuit_analysis",
         lambda net, case, fault, bus_ids: {
             "case": case,
             "fault": fault,
@@ -52,7 +52,7 @@ def test_run_short_circuit_auto_fills_ext_grid_defaults(monkeypatch) -> None:
             "machine_summary": {"max_ikss_ka": 8.0, "min_ikss_ka": 8.0, "rows": 1},
         }
 
-    monkeypatch.setattr("app.power.tools.short_circuit_analysis", _fake_short_circuit)
+    monkeypatch.setattr("pandapower_agent.power.handlers.analysis.short_circuit_analysis", _fake_short_circuit)
 
     result = executor.execute("run_short_circuit", {"case": "max", "fault": "3ph"})
     assert result.ok
@@ -73,7 +73,7 @@ def test_run_short_circuit_reports_zero_sequence_missing(monkeypatch) -> None:
             raise ValueError("short circuit apparent power s_sc_max_mva needs to be specified for external grid")
         raise KeyError("r0_ohm_per_km")
 
-    monkeypatch.setattr("app.power.tools.short_circuit_analysis", _fake_short_circuit)
+    monkeypatch.setattr("pandapower_agent.power.handlers.analysis.short_circuit_analysis", _fake_short_circuit)
 
     result = executor.execute("run_short_circuit", {"case": "max", "fault": "1ph"})
     assert not result.ok
@@ -106,7 +106,7 @@ def test_run_short_circuit_falls_back_with_generators_excluded(monkeypatch) -> N
             "machine_summary": {"max_ikss_ka": 4.0, "min_ikss_ka": 4.0, "rows": 1},
         }
 
-    monkeypatch.setattr("app.power.tools.short_circuit_analysis", _fake_short_circuit)
+    monkeypatch.setattr("pandapower_agent.power.handlers.analysis.short_circuit_analysis", _fake_short_circuit)
 
     result = executor.execute("run_short_circuit", {"case": "max", "fault": "1ph"})
     assert result.ok
@@ -134,7 +134,7 @@ def test_run_short_circuit_reports_zero_sequence_after_generator_fallback_failur
             raise AttributeError("'DataFrame' object has no attribute 'vn_kv'")
         raise KeyError("r0_ohm_per_km")
 
-    monkeypatch.setattr("app.power.tools.short_circuit_analysis", _fake_short_circuit)
+    monkeypatch.setattr("pandapower_agent.power.handlers.analysis.short_circuit_analysis", _fake_short_circuit)
 
     result = executor.execute("run_short_circuit", {"case": "max", "fault": "1ph"})
     assert not result.ok
@@ -153,7 +153,7 @@ def test_run_short_circuit_hides_raw_generator_error(monkeypatch) -> None:
         _ = net, case, fault, bus_ids
         raise AttributeError("'DataFrame' object has no attribute 'vn_kv'")
 
-    monkeypatch.setattr("app.power.tools.short_circuit_analysis", _fake_short_circuit)
+    monkeypatch.setattr("pandapower_agent.power.handlers.analysis.short_circuit_analysis", _fake_short_circuit)
 
     result = executor.execute("run_short_circuit", {"case": "max", "fault": "3ph"})
     assert not result.ok

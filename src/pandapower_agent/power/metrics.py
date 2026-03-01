@@ -27,13 +27,19 @@ def summarize_network_metrics(net: Any) -> dict[str, float | None]:
         summary["min_bus_vm_pu"] = _safe_float(net.res_bus["vm_pu"].min())
         summary["max_bus_vm_pu"] = _safe_float(net.res_bus["vm_pu"].max())
 
-    if hasattr(net, "res_ext_grid") and getattr(net.res_ext_grid, "empty", True) is False and "p_mw" in net.res_ext_grid:
+    if (
+        hasattr(net, "res_ext_grid")
+        and getattr(net.res_ext_grid, "empty", True) is False
+        and "p_mw" in net.res_ext_grid
+    ):
         summary["total_active_loss_mw"] = _safe_float(net.res_ext_grid["p_mw"].sum())
 
     return summary
 
 
-def diff_metrics(a: dict[str, float | None], b: dict[str, float | None], metric_keys: list[str] | None = None) -> dict[str, dict[str, float | None]]:
+def diff_metrics(
+    a: dict[str, float | None], b: dict[str, float | None], metric_keys: list[str] | None = None
+) -> dict[str, dict[str, float | None]]:
     keys = metric_keys or sorted(set(a) | set(b))
     out: dict[str, dict[str, float | None]] = {}
     for k in keys:

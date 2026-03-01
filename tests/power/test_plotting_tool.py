@@ -6,8 +6,8 @@ from types import SimpleNamespace
 
 import pandas as pd
 
-from app.power.state import SessionState
-from app.power.tools import ToolExecutor
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.power.executor import ToolExecutor
 
 
 class _FakeFigure:
@@ -94,7 +94,9 @@ def test_plot_analysis_result_short_circuit(monkeypatch, tmp_path) -> None:
         }
     }
     executor = ToolExecutor(state)
-    monkeypatch.setattr("app.power.tools._import_plotting_backend", lambda: (_FakeSns(), _FakePlt()))
+    monkeypatch.setattr(
+        "pandapower_agent.power.handlers.common.import_plotting_backend", lambda: (_FakeSns(), _FakePlt())
+    )
 
     out_file = tmp_path / "sc_plot.png"
     result = executor.execute(
@@ -117,7 +119,9 @@ def test_plot_analysis_result_auto_source_selection(monkeypatch, tmp_path) -> No
         }
     }
     executor = ToolExecutor(state)
-    monkeypatch.setattr("app.power.tools._import_plotting_backend", lambda: (_FakeSns(), _FakePlt()))
+    monkeypatch.setattr(
+        "pandapower_agent.power.handlers.common.import_plotting_backend", lambda: (_FakeSns(), _FakePlt())
+    )
 
     out_file = tmp_path / "pf_plot.png"
     result = executor.execute("plot_analysis_result", {"path": str(out_file)})
@@ -136,7 +140,9 @@ def test_plot_analysis_result_returns_error_for_invalid_metric(monkeypatch, tmp_
         }
     }
     executor = ToolExecutor(state)
-    monkeypatch.setattr("app.power.tools._import_plotting_backend", lambda: (_FakeSns(), _FakePlt()))
+    monkeypatch.setattr(
+        "pandapower_agent.power.handlers.common.import_plotting_backend", lambda: (_FakeSns(), _FakePlt())
+    )
 
     result = executor.execute(
         "plot_analysis_result",
@@ -149,7 +155,7 @@ def test_plot_analysis_result_returns_error_for_invalid_metric(monkeypatch, tmp_
 def test_plot_analysis_result_without_any_results(monkeypatch) -> None:
     state = SessionState()
     executor = ToolExecutor(state)
-    monkeypatch.setattr("app.power.tools._load_cached_results", lambda: {})
+    monkeypatch.setattr("pandapower_agent.power.handlers.plotting.load_cached_results", lambda: {})
     result = executor.execute("plot_analysis_result", {"path": "./outputs/none.png"})
     assert not result.ok
     assert "No analysis results available to plot" in result.message
@@ -174,7 +180,10 @@ def test_plot_network_layout_uses_pandapower_builtin(monkeypatch, tmp_path) -> N
         gen=pd.DataFrame(index=[]),
     )
     executor = ToolExecutor(state)
-    monkeypatch.setattr("app.power.tools._import_pandapower_plotting_backend", lambda: (_FakePPPlot(), _FakePlt()))
+    monkeypatch.setattr(
+        "pandapower_agent.power.handlers.plotting.import_pandapower_plotting_backend",
+        lambda: (_FakePPPlot(), _FakePlt()),
+    )
     _FakeAxes.text_calls.clear()
 
     out_file = tmp_path / "network_plot.png"

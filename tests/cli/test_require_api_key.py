@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from app.main import require_api_key, settings
+from pandapower_agent.cli.dispatch import require_api_key
+from pandapower_agent.config import settings
 
 
 def test_require_api_key_accepts_non_placeholder(monkeypatch) -> None:

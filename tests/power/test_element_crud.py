@@ -4,8 +4,8 @@ from types import SimpleNamespace
 
 import pandas as pd
 
-from app.power.state import SessionState
-from app.power.tools import ToolExecutor
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.power.executor import ToolExecutor
 
 
 class FakePP:
@@ -24,7 +24,9 @@ class FakePP:
         net.sgen.loc[idx] = {"bus": bus, "p_mw": p_mw, "q_mvar": q_mvar, "vm_pu": vm_pu, "name": name}
         return idx
 
-    def create_line_from_parameters(self, net, from_bus, to_bus, length_km, r_ohm_per_km, x_ohm_per_km, c_nf_per_km, max_i_ka, name=None):
+    def create_line_from_parameters(
+        self, net, from_bus, to_bus, length_km, r_ohm_per_km, x_ohm_per_km, c_nf_per_km, max_i_ka, name=None
+    ):
         idx = self._ids["line"]
         self._ids["line"] += 1
         net.line.loc[idx] = {"from_bus": from_bus, "to_bus": to_bus, "in_service": True, "name": name}
@@ -70,7 +72,7 @@ def test_create_and_update_elements(monkeypatch) -> None:
     state.scenarios["current"] = state.working_net
     executor = ToolExecutor(state)
 
-    monkeypatch.setattr("app.power.tools._import_pp", lambda: FakePP())
+    monkeypatch.setattr("pandapower_agent.power.handlers.mutation.import_pp", lambda: FakePP())
 
     load_result = executor.execute("create_load", {"bus_id": 1, "p_mw": 5.0, "q_mvar": 1.0, "name": "L1"})
     sgen_result = executor.execute("create_sgen", {"bus_id": 2, "p_mw": 3.0, "q_mvar": 0.0, "name": "DG1"})
@@ -118,7 +120,9 @@ def test_update_element_params_and_toggle() -> None:
     state.scenarios["current"] = net
     executor = ToolExecutor(state)
 
-    upd = executor.execute("update_element_params", {"element_type": "line", "element_id": 3, "fields": {"name": "line3-new"}})
+    upd = executor.execute(
+        "update_element_params", {"element_type": "line", "element_id": 3, "fields": {"name": "line3-new"}}
+    )
     tog = executor.execute("toggle_element", {"element_type": "line", "element_id": 3, "in_service": False})
     assert upd.ok
     assert tog.ok

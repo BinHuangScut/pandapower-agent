@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.power.metrics import summarize_network_metrics
+from pandapower_agent.power.metrics import summarize_network_metrics
 
 
 def _import_pp():

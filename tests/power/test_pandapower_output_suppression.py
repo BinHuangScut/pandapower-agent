@@ -4,8 +4,8 @@ import sys
 import warnings
 from types import SimpleNamespace
 
-from app.power.state import SessionState
-from app.power.tools import ToolExecutor
+from pandapower_agent.power.state import SessionState
+from pandapower_agent.power.executor import ToolExecutor
 
 
 class FakePandapowerError(RuntimeError):
@@ -24,7 +24,7 @@ def test_tool_executor_hides_raw_pandapower_error(monkeypatch) -> None:
     def _raise(*_args, **_kwargs):
         raise FakePandapowerError("raw pandapower solver failure detail")
 
-    monkeypatch.setattr("app.power.tools.analysis_run_ac_power_flow", _raise)
+    monkeypatch.setattr("pandapower_agent.power.handlers.analysis.analysis_run_ac_power_flow", _raise)
 
     result = executor.execute("run_power_flow", {"algorithm": "nr", "enforce_q_lims": False})
 
@@ -47,7 +47,7 @@ def test_tool_executor_suppresses_runtime_warning_stdout_stderr(monkeypatch) -> 
         print("noisy stderr from power runtime", file=sys.stderr)
         return {"mode": "ac", "machine_summary": {"x": 1}}
 
-    monkeypatch.setattr("app.power.tools.analysis_run_ac_power_flow", _noisy)
+    monkeypatch.setattr("pandapower_agent.power.handlers.analysis.analysis_run_ac_power_flow", _noisy)
 
     result = executor.execute("run_power_flow", {"algorithm": "nr", "enforce_q_lims": False})
 
