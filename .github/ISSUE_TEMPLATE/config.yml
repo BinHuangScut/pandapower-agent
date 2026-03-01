@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability report
+    url: https://github.com/banw/pandapower-agent/security/advisories/new
+    about: Report security issues privately via GitHub Security Advisories.
+  - name: Discussions
+    url: https://github.com/banw/pandapower-agent/discussions
+    about: Ask questions or share usage examples in Discussions.

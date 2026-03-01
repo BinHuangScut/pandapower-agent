@@ -1,0 +1,42 @@
+name: Bug report
+description: Report a reproducible defect
+labels: [bug]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Minimal steps and commands
+      placeholder: |
+        1. agent use case14
+        2. agent run "..."
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: python, pandapower-agent, pandapower
+      placeholder: Python 3.11, pandapower-agent 0.1.0, pandapower 2.x
+    validations:
+      required: true

@@ -1,0 +1,18 @@
+title: "Show and tell"
+labels: ["showcase"]
+body:
+  - type: markdown
+    attributes:
+      value: Share how you are using pandapower-agent.
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What kind of network/problem are you solving?
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Workflow
+      description: Commands/prompts that worked well
