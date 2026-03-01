@@ -37,10 +37,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/banw/pandapower-agent"
-Repository = "https://github.com/banw/pandapower-agent"
-Issues = "https://github.com/banw/pandapower-agent/issues"
-Changelog = "https://github.com/banw/pandapower-agent/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/BinHuangScut/pandapower-agent"
+Repository = "https://github.com/BinHuangScut/pandapower-agent"
+Issues = "https://github.com/BinHuangScut/pandapower-agent/issues"
+Changelog = "https://github.com/BinHuangScut/pandapower-agent/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [

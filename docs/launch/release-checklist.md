@@ -28,7 +28,7 @@ twine check dist/*
 ## TestPyPI trusted publisher setup
 
 - [ ] Create project on TestPyPI (`pandapower-agent`) if not already created.
-- [ ] Configure trusted publisher for owner `banw`, repo `pandapower-agent`, workflow `publish-testpypi.yml`, environment `testpypi`.
+- [ ] Configure trusted publisher for owner `BinHuangScut`, repo `pandapower-agent`, workflow `publish-testpypi.yml`, environment `testpypi`.
 - [ ] Create GitHub Environment `testpypi` for this repository.
 
 ## Test package publish contract
