@@ -8,6 +8,9 @@ from typing import Any
 from pandapower_agent.agent.render import console
 from pandapower_agent.config import _normalize_api_key, _normalize_base_url, settings
 
+_CONNECTIVITY_TEST_MAX_TOKENS = 16
+_EMPTY_API_KEY_HINT = "Please check whether you entered an empty API key."
+
 
 def _read_existing_dotenv(path: Path) -> dict[str, str]:
     if not path.exists():
@@ -47,13 +50,13 @@ def _verify_llm_config(provider: str, api_key: str, model: str, base_url: str) -
             client.chat.completions.create(
                 model=model,
                 messages=[{"role": "user", "content": "ping"}],
-                max_tokens=8,
+                max_tokens=_CONNECTIVITY_TEST_MAX_TOKENS,
             )
         else:
             client.responses.create(
                 model=model,
                 input="ping",
-                max_output_tokens=8,
+                max_output_tokens=_CONNECTIVITY_TEST_MAX_TOKENS,
             )
     except Exception as exc:
         return False, f"{type(exc).__name__}: {exc}"
@@ -124,22 +127,25 @@ def run_config_init_command(args: argparse.Namespace) -> int:
     if google_key is None:
         google_key = existing.get("GOOGLE_API_KEY", settings.google_api_key)
 
-    if interactive and args.openai_api_key is None:
-        openai_candidate = _prompt_secret("OPENAI_API_KEY (hidden; leave empty to keep current): ")
-        if openai_candidate:
-            openai_key = openai_candidate
-    if interactive and args.google_api_key is None:
-        google_candidate = _prompt_secret("GOOGLE_API_KEY (hidden; leave empty to keep current): ")
-        if google_candidate:
-            google_key = google_candidate
+    if interactive:
+        if provider == "openai" and args.openai_api_key is None:
+            openai_candidate = _prompt_secret("OPENAI_API_KEY (hidden; leave empty to keep current): ")
+            if openai_candidate:
+                openai_key = openai_candidate
+        if provider == "google" and args.google_api_key is None:
+            google_candidate = _prompt_secret("GOOGLE_API_KEY (hidden; leave empty to keep current): ")
+            if google_candidate:
+                google_key = google_candidate
 
     normalized_openai_key = _normalize_api_key(openai_key or "")
     normalized_google_key = _normalize_api_key(google_key or "")
     if provider == "openai" and not normalized_openai_key:
         console.print("OPENAI_API_KEY is required for provider=openai.")
+        console.print(_EMPTY_API_KEY_HINT)
         return 1
     if provider == "google" and not normalized_google_key and not normalized_openai_key:
         console.print("GOOGLE_API_KEY (or fallback OPENAI_API_KEY) is required for provider=google.")
+        console.print(_EMPTY_API_KEY_HINT)
         return 1
 
     try:
@@ -165,6 +171,7 @@ def run_config_init_command(args: argparse.Namespace) -> int:
         ok, message = _verify_llm_config(provider=provider, api_key=active_key, model=active_model, base_url=active_base_url)
         if not ok:
             console.print(f"Connectivity check failed: {message}")
+            console.print(_EMPTY_API_KEY_HINT)
             console.print("Use --skip-check to save config without validation.")
             return 1
         console.print(message)
